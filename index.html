@@ -11148,6 +11148,7 @@
             margin-right: .25em;
         }
         .timeLebal-highlight{background-color: red;}
+
     </style>
 </head>
 
@@ -11418,17 +11419,18 @@
             const DATA_LENGTH = objParams.res.length;
 
             const HIGHLIGHT_TIME = 10;
+            const getEuSym = function (index) {
+                // index=0 是標題列，不是真資料；序號從 index=1 開始
+                return index;
+            };
             const getEuTime = function (index) {
-                const strIndex = index.toString();
-                const strTime = strIndex.substring(strIndex.length - 1);
-                let time = parseInt(strTime, 10) - 1;
-                if (time <= 0) {
-                    time = (time === 0) ? 9 : 10;
-                }
-                return time;
+                const sym = getEuSym(index);
+                return (sym % 10 === 0) ? 10 : (sym % 10);
             };
 
-            // 歐式：從最近一次 time=10 顯示到最新；中式維持最新三筆
+            // 歐式：只顯示最後一組（10 筆為一組，不滿 10 筆也算一組）
+            // 作法：從最後一筆往前找最近的 time=10，從該筆顯示到最新
+            // 中式：維持最新三筆
             let displayStartIndex = DATA_LENGTH - 3;
             if (objParams.type === 'Eu') {
                 displayStartIndex = 1;
@@ -11477,6 +11479,24 @@
             top['elHisTop3' + objParams.type].innerHTML = top['top3Html' + objParams.type];
             top['top3Html' + objParams.type] = ``;
 
+            syncHistoryListHeight();
+
+        }
+
+        /**
+         * 歷史清單高度以歐式為準，中式對齊歐式
+         */
+        function syncHistoryListHeight() {
+            if (!elHisTop3Eu || !elHisTop3Cn) { return; }
+
+            // 先清掉舊的固定高度，讓歐式高度依資料自然展開
+            elHisTop3Eu.style.height = '';
+
+            const euHeight = elHisTop3Eu.scrollHeight;
+            if (euHeight > 0) {
+                elHisTop3Cn.style.height = `${euHeight}px`;
+                elHisTop3Cn.style.justifyContent = 'flex-end';
+            }
         }
 
 
