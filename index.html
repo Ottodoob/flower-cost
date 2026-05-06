@@ -11149,6 +11149,9 @@
         }
         .timeLebal-highlight{background-color: red;}
 
+        #hisTop3Eu, #hisTop3Cn{
+            justify-content: flex-end;
+        }
     </style>
 </head>
 
@@ -11489,13 +11492,18 @@
         function syncHistoryListHeight() {
             if (!elHisTop3Eu || !elHisTop3Cn) { return; }
 
-            // 先清掉舊的固定高度，讓歐式高度依資料自然展開
+            // 先清掉舊的固定高度，讓兩側高度依資料自然展開
             elHisTop3Eu.style.height = '';
+            elHisTop3Cn.style.height = '';
 
             const euHeight = elHisTop3Eu.scrollHeight;
-            if (euHeight > 0) {
-                elHisTop3Cn.style.height = `${euHeight}px`;
-                elHisTop3Cn.style.justifyContent = 'flex-end';
+            const cnHeight = elHisTop3Cn.scrollHeight;
+
+            // 兩側取較大的高度，讓雙欄對齊
+            const maxHeight = Math.max(euHeight, cnHeight);
+            if (maxHeight > 0) {
+                elHisTop3Eu.style.height = `${maxHeight}px`;
+                elHisTop3Cn.style.height = `${maxHeight}px`;
             }
         }
 
