@@ -11415,12 +11415,32 @@
             top['elPriceFlower' + objParams.type].textContent = formatPrice(objParams.summaryData[3]);
             top['elPriceStudy' + objParams.type].textContent = formatPrice(objParams.summaryData[2]);
 
-            // 取最新的三筆
             const DATA_LENGTH = objParams.res.length;
-            top['aryTop3' + objParams.type] = objParams.res.slice(DATA_LENGTH - 3);
 
-            // 算本月花費
             const HIGHLIGHT_TIME = 10;
+            const getEuTime = function (index) {
+                const strIndex = index.toString();
+                const strTime = strIndex.substring(strIndex.length - 1);
+                let time = parseInt(strTime, 10) - 1;
+                if (time <= 0) {
+                    time = (time === 0) ? 9 : 10;
+                }
+                return time;
+            };
+
+            // 歐式：從最近一次 time=10 顯示到最新；中式維持最新三筆
+            let displayStartIndex = DATA_LENGTH - 3;
+            if (objParams.type === 'Eu') {
+                displayStartIndex = 1;
+                for (let i = DATA_LENGTH - 1; i > 0; i--) {
+                    if (getEuTime(i) === HIGHLIGHT_TIME) {
+                        displayStartIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // 算本月花費與組畫面
             top['top3Html' + objParams.type] = ``;
             objParams.res.forEach((x, index, ary) => {
 
@@ -11437,20 +11457,12 @@
                         }
                     }
 
-                    // 取最新的三筆
-                    if (index >= DATA_LENGTH - 3) {
-                        
-                        const strIndex = index.toString();
-                        const strTime = strIndex.substring(strIndex.length - 1);
-                        
-                        let time =  0;
+                    if (index >= displayStartIndex) {
+
                         let timeMessage = '';
 
                         if(objParams.type === 'Eu'){
-                            time = parseInt(strTime, 10) - 1;
-                            if (time <= 0) {
-                                time = (time === 0) ? 9 : 10;
-                            }
+                            const time = getEuTime(index);
                             timeMessage = `<span class="uk-flex uk-flex-middle uk-flex-center timeLebal ${time === HIGHLIGHT_TIME ? 'timeLebal-highlight':''}">${time}</span>`
                         }
                         top['top3Html' + objParams.type] += `<div class="uk-flex uk-flex-middle uk-width-1-1">${timeMessage}<span>${x[1]}</span><span class="uk-margin-auto-left">$${x[3]}</span></div>`
